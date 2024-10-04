@@ -12,7 +12,7 @@ number. When we are done (probably after only 3 rounds instead of 10) someone wi
 declared the winner. If a Sybil attack is possible, it should be manifested here. 
 
 When this is inevitably moved from "couch game" mode to a fully functioning on-chain
-game of change (with money built in), it will not use some browser extension like metamask.
+game of chance (with money built in), it will not use some browser extension like metamask.
 Instead, each player will paste their private key into the trusted resource. It can be trusted
 because it either lives entirely on their computer or in IPFS and can be audited and
 understood not to change. The question of a Sybil attack will of course arise in that 
