@@ -1,0 +1,27 @@
+<html>
+
+<head>
+<script src="../quickLoad/ethers-6.6.0.umd.min.js"></script>
+</head>
+</html>
+
+<script>
+
+b = Array();
+b.seeds  = Array("0x12345678901234567890","0xfefefefefefefe","0xdeadbeefcafe")
+b.hashStack = Array();
+
+for(x = 0; x < 3; x++)
+  {
+  var next = b.seeds[x];
+  b.hashStack[x] = Array();
+  for(y = 0; y < 10; y++)
+   {
+   b.hashStack[x][y] = ethers.keccak256(next)
+   next = b.hashStack[x][y]
+   }
+  }
+
+
+
+</script>
