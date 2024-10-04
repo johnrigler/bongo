@@ -30,3 +30,14 @@ cohort of Sybil attackers.
 
 I have done some work on the Solidity side of this and will include that contract as well. The two
 pieces do not attach yet, but are simply Riskiest Assumption Tests.
+
+Pull requests are appreciated. Not only is this FOSS, but I literally can't even monetize it in a
+traditional way unless I relocate to a tax haven. This project is designed to generate buzz and 
+increase Web3 adoption by doing things which simply wouldn't be possible in Web2.
+
+Also, I explore the relevance and legally of this in my LinkedIn "Web3 for World3.0" newsletter. Check it 
+out, connect, and subscribe:
+
+https://www.linkedin.com/pulse/lets-play-bongo-web3-tipping-point-here-john-rigler-jxeac/
+
+Thanks
