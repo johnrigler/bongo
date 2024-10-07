@@ -1,27 +1,246 @@
 <html>
 
 <head>
-<script src="../quickLoad/ethers-6.6.0.umd.min.js"></script>
+<script src="ethers-6.6.0.umd.min.js"></script>
+<!-- Do not ever share your keys.js file!!! I don't want to steal your crypto. -->
+<script src="../keys.js"></script>
 </head>
 </html>
 
 <script>
 
+/*
+I like to create arrays of functionality, like objects I guess. 
+Ethers gives you the "ethers" family of commands, and in the 
+same way "f" is just where I store my various tools for 
+different projects. I think it stands for Fiona.
+
+
+*/
+
+f = Array();
+f.utils = Array();
+
+f.utils.delayLoad = async function delayLoad() {
+  await f.utils.sleep(800);  
+  console.log("xx")
+  await f.utils.sleep(800);
+  console.log("xx")
+}
+
+f.utils.sleep = function sleep(time) {
+return new Promise((resolve) => setTimeout(resolve, time));
+ }
+
+/* Here is my abi, generated from a one file solidity project on Remix (https://remix.ethereum.org/).
+*/
+
+abi = [
+	{
+		"stateMutability": "payable",
+		"type": "fallback"
+	},
+	{
+		"inputs": [],
+		"name": "gamehash",
+		"outputs": [
+			{
+				"internalType": "bytes1",
+				"name": "",
+				"type": "bytes1"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "gas",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes",
+				"name": "hash",
+				"type": "bytes"
+			}
+		],
+		"name": "hashStack",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "left",
+		"outputs": [
+			{
+				"internalType": "bytes1",
+				"name": "",
+				"type": "bytes1"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "map",
+		"outputs": [
+			{
+				"internalType": "bytes",
+				"name": "",
+				"type": "bytes"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "right",
+		"outputs": [
+			{
+				"internalType": "bytes1",
+				"name": "",
+				"type": "bytes1"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "score",
+		"outputs": [
+			{
+				"internalType": "uint16",
+				"name": "",
+				"type": "uint16"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "thisblock",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"stateMutability": "payable",
+		"type": "receive"
+	}
+]
+
+/*
+Various other stuff to set up the smart contract, 137 is Polygon Network.
+*/
+
+provider = ethers.getDefaultProvider(137);
+
+/* 
+I will try to keep my code posted to Polygonscan so you can use it as a semi-graphical
+interface. Sometimes, that is nice. You can also just use Remix. I tend to open up
+a console log and just access my various new libraries (such as the "b" for bongo
+array shown below. You can play the whole game from the command line. Uber backend stuff.
+*/
+
+// contractAddress = "0x97027B6F8d7E1A5d858F5592628A14eD6D981Ee4";
+//contractAddress = "0x718c0Ecda544129d91e176c66cb064dCF26a4709";
+contractAddress = "0xBB28791996616150D779Ccca7Acea415442e0f64";
+
+/*
+These are my seeds. Obviously they should be random, but for now it is easier if this is
+deterministic. Given some rule set, one of these seeds should always win.
+*/
+
+var seeds  = Array("0x12345678901234567890","0xfefefefefefefe","0xdeadbeefcafe","0xb00b4b0b")
+
+/* "B" for Bongo */
+
+/* At this point, you may be asking why the heck am I doing things the way that I do. Why not use 
+the tried and true glorious NodeJS/React/Hardhat suite of Super-tools. Yea, no. This is web3. There 
+need not be a server. This can be run from the end user's computer or from IPFS. Ultimately I would like 
+to use the Godot Gaming API to build a wrapper that just downloads this from the ledger. Only a stub would
+be in the Godot game. Thus there is no stench of unsavory gambling associated with any offering. It is all
+part of the Web3 experience. 
+
 b = Array();
-b.seeds  = Array("0x12345678901234567890","0xfefefefefefefe","0xdeadbeefcafe")
+b.player = Array();
+b.contract = Array();
+
+/*
+This is a proving ground for my hashStack idea. Basically, you create the stack by getting an hash of a hash of a hash. The final hash that you generate is used first. So this truly is a stack, although you must read it from end to beginning. No one wins any points on a round unless they have provided a hash which is the "root" (not sure of the
+terminology) of the previously presented hash. Right now, this is all the game does. Your score increases 
+based on your hash plus the hash of the previous block. This is where any Sybil shenanigans would come into play.
+Let's track down that madness. But because you are locked into the next value that you must give, an attack could
+only be a skipped turn. Because turns are no longer tied to metamask, it is quite easy to get them all into the same
+block. This is my response to Keir Finlow-Bates, who has graciously given me a critique of my ideas so far. Follow him and his buddies on LinkedIn--- do it now. 
+*/
+
 b.hashStack = Array();
 
-for(x = 0; x < 3; x++)
+for(x = 0; x < 4; x++) 
   {
-  var next = b.seeds[x];
+  /* Each player has their own contract. This will start out as a game where
+    you can simulate four different players at once, but if two people are playing
+    at the same time, the ledger won't know. So to be single players...well you get it.
+  */
+  b.player[x] = new ethers.Wallet(keys[x], provider);
+  b.contract[x] = new ethers.Contract(contractAddress,abi,b.player[x]);
+
+  /* This is the hashStack part, the contract wants you to feel these numbers in backwards.
+  Mess up and your score goes back to zero. This is my source of PRAND entropy. For now, this
+  is only mixed with the previous blocks hash. Hoping I won't have to use ChainLink.
+  */
+  var next = seeds[x];
   b.hashStack[x] = Array();
   for(y = 0; y < 10; y++)
    {
    b.hashStack[x][y] = ethers.keccak256(next)
    next = b.hashStack[x][y]
    }
+  /* Now each player has ten potential turns */
   }
 
+/* The name says it all, from here, I just fiddle from the console, Remix, or Polygonscan. I only 
+code stuff into the formal program when I like it. REPL for the win.  */
 
+function runIt( x = 0, y = 0 ) {
+
+var gasPrice = 250000000000
+b.contract[x].hashStack(b.hashStack[x][y], { "gasPrice":gasPrice })
+
+}
 
 </script>
